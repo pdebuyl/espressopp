@@ -55,7 +55,7 @@ namespace espressopp {
       pb->shape[1] = d;
       pb->itemsize = sizeof(T);
       pb->len = pb->itemsize;
-      for (int i=0; i<d; i++) {
+      for (int i=0; i<pb->ndim; i++) {
 	pb->len *= pb->shape[i];
       }
       pb->buf = malloc(pb->len);
@@ -75,7 +75,6 @@ namespace espressopp {
       System& system = getSystemRef();
 
       int NLocal = system.storage->getNRealParticles();
-      std::cout << "Nlocal " << NLocal << std::endl ;
 
       init_pb<real>(&position, NLocal, 3);
 
@@ -85,9 +84,7 @@ namespace espressopp {
       real *tmpBuf = (real *) position.buf;
       for(iterator::CellListIterator cit(realCells); !cit.isDone(); ++cit) {
 	Real3D &tmpPos = cit->position();
-	std::cout << "partic " << i << " " << tmpPos[0] << std::endl ;
 	tmpBuf[3*i] = tmpPos[0];
-	std::cout << "buf " << i << " " << tmpBuf[3*i] << std::endl ;
 	tmpBuf[3*i+1] = tmpPos[1];
 	tmpBuf[3*i+2] = tmpPos[2];
 	i++;
