@@ -7,6 +7,10 @@ from _espressopp import analysis_PyStore
 class PyStoreLocal(analysis_PyStore):
     def __init__(self, system):
         cxxinit(self, analysis_PyStore, system)
+    def update(self):
+        self.cxxclass.update(self)
+    def getPosition(self):
+        return self.cxxclass.getPosition(self)
 
 if pmi.isController:
     class PyStore(object):
