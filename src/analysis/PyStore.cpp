@@ -95,12 +95,11 @@ namespace espressopp {
       CellList realCells = system.storage->getRealCells();
 
       int i=0;
-      real *tmpBuf = (real *) position.buf;
       for(iterator::CellListIterator cit(realCells); !cit.isDone(); ++cit) {
 	Real3D &tmpPos = cit->position();
-	tmpBuf[3*i] = tmpPos[0];
-	tmpBuf[3*i+1] = tmpPos[1];
-	tmpBuf[3*i+2] = tmpPos[2];
+	((real *) position.buf)[3*i] = tmpPos[0];
+	((real *) position.buf)[3*i+1] = tmpPos[1];
+	((real *) position.buf)[3*i+2] = tmpPos[2];
 	i++;
       }
     }
