@@ -37,7 +37,13 @@ namespace espressopp {
     class PyStore : public SystemAccess {
     public:
       PyStore(shared_ptr<System> system);
-      ~PyStore() {};
+      ~PyStore();
+
+      void set_store_position(bool _s) { store_position=_s; }
+      bool get_store_position() { return store_position; }
+      void set_store_id(bool _s) { store_id=_s; }
+      bool get_store_id() { return store_id; }
+      void clear_buffers();
 
       void update();
       PyObject* getPosition();
@@ -45,6 +51,7 @@ namespace espressopp {
       static void registerPython();
     private:
       bool store_position, store_velocity, store_mass, store_id, store_force, store_species;
+      bool cleared;
       Py_buffer position;
       Py_buffer velocity;
       Py_buffer mass;

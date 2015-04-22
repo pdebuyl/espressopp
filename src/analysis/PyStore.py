@@ -42,4 +42,5 @@ if pmi.isController:
         pmiproxydefs = dict(
             cls =  'espressopp.analysis.PyStoreLocal',
             pmicall = ['update', 'getPosition', 'open_file', 'close_file', 'dump'],
+            pmiproperty = ['store_position', 'store_id'],
         )

@@ -68,7 +68,20 @@ namespace espressopp {
     }
 
     PyStore::PyStore(shared_ptr<System> system) : SystemAccess(system) {
-      store_position = true;
+      store_position = store_id = true;
+      store_velocity = store_mass = store_force = store_species = false;
+      cleared = true;
+    }
+
+    PyStore::~PyStore() {
+      if (!cleared) clear_buffers();
+    }
+
+    void PyStore::clear_buffers() {
+      if (!cleared) {
+	if (store_position) free_pb(&position);
+	if (store_id) free_pb(&id);
+      }
     }
 
     void PyStore::update() {
@@ -76,7 +89,8 @@ namespace espressopp {
 
       int NLocal = system.storage->getNRealParticles();
 
-      init_pb<real>(&position, NLocal, 3);
+      if (store_position) init_pb<real>(&position, NLocal, 3);
+      if (store_id) init_pb<real>(&position, NLocal, 3);
 
       CellList realCells = system.storage->getRealCells();
 
@@ -101,7 +115,11 @@ namespace espressopp {
       class_<PyStore>
 	("analysis_PyStore", init< shared_ptr< System > >())
 	.def("update", &PyStore::update)
+	.def("clear_buffers", &PyStore::clear_buffers)
 	.def("getPosition", &PyStore::getPosition)
+        .add_property("store_position", &PyStore::get_store_position, &PyStore::set_store_position)
+        .add_property("store_id", &PyStore::get_store_id, &PyStore::set_store_id)
+
 	;
     }
 
