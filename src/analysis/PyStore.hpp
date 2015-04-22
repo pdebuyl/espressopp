@@ -47,6 +47,7 @@ namespace espressopp {
 
       void update();
       PyObject* getPosition();
+      PyObject* getId();
 
       static void registerPython();
     private:

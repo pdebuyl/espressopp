@@ -93,22 +93,29 @@ namespace espressopp {
       shape[1] = 3;
 
       if (store_position) init_pb<real>(&position, 2, shape);
-      if (store_id) init_pb<real>(&id, 1, shape);
+      if (store_id) init_pb<longint>(&id, 1, shape);
 
       CellList realCells = system.storage->getRealCells();
 
       int i=0;
       for(iterator::CellListIterator cit(realCells); !cit.isDone(); ++cit) {
-	Real3D &tmpPos = cit->position();
-	((real *) position.buf)[3*i] = tmpPos[0];
-	((real *) position.buf)[3*i+1] = tmpPos[1];
-	((real *) position.buf)[3*i+2] = tmpPos[2];
+	if (store_position) {
+	  Real3D &tmpPos = cit->position();
+	  ((real *) position.buf)[3*i] = tmpPos[0];
+	  ((real *) position.buf)[3*i+1] = tmpPos[1];
+	  ((real *) position.buf)[3*i+2] = tmpPos[2];
+	}
+	if (store_id) ((longint *) id.buf)[i] = cit->getId();
 	i++;
       }
     }
 
     PyObject* PyStore::getPosition() {
       return PyMemoryView_FromBuffer(&position);
+    }
+
+    PyObject* PyStore::getId() {
+      return PyMemoryView_FromBuffer(&id);
     }
 
     void PyStore::registerPython() {
@@ -119,6 +126,7 @@ namespace espressopp {
 	.def("update", &PyStore::update)
 	.def("clear_buffers", &PyStore::clear_buffers)
 	.def("getPosition", &PyStore::getPosition)
+	.def("getId", &PyStore::getId)
         .add_property("store_position", &PyStore::get_store_position, &PyStore::set_store_position)
         .add_property("store_id", &PyStore::get_store_id, &PyStore::set_store_id)
 

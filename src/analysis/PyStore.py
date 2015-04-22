@@ -14,12 +14,16 @@ class PyStoreLocal(analysis_PyStore):
         self.cxxclass.update(self)
     def getPosition(self):
         return self.cxxclass.getPosition(self)
+    def getId(self):
+        return self.cxxclass.getId(self)
     def open_file(self, filename):
         self.file = h5py.File(filename, 'w', driver='mpio', comm=MPI.COMM_WORLD)
     def dump(self):
         self.update()
         pos_data = self.getPosition()
         pos = np.asarray(pos_data)
+        id_data = self.getId()
+        id_ar = np.asarray(id_data)
         NLocal = np.array(pos.shape[0], 'i')
         NMaxLocal = np.array(0, 'i')
         MPI.COMM_WORLD.Allreduce(NLocal, NMaxLocal, op=MPI.MAX)
@@ -30,6 +34,8 @@ class PyStoreLocal(analysis_PyStore):
         idx_0 = MPI.COMM_WORLD.rank*cpu_size
         idx_1 = idx_0+NLocal
         self.file['position'][idx_0:idx_1] = pos
+        self.file.create_dataset('id', (total_size,), dtype=int, chunks=(256,), fillvalue=-1)
+        self.file['id'][idx_0:idx_1] = id_ar
         self.file.create_dataset('species', (total_size,), dtype=int, chunks=(256,))
         self.file['species'][idx_0:idx_1] = 1
 
@@ -41,6 +47,6 @@ if pmi.isController:
         __metaclass__ = pmi.Proxy
         pmiproxydefs = dict(
             cls =  'espressopp.analysis.PyStoreLocal',
-            pmicall = ['update', 'getPosition', 'open_file', 'close_file', 'dump'],
+            pmicall = ['update', 'getPosition', 'getId', 'open_file', 'close_file', 'dump'],
             pmiproperty = ['store_position', 'store_id'],
         )
