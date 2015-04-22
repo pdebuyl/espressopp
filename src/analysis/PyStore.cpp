@@ -36,7 +36,7 @@ namespace espressopp {
 
     /** Initialize a Py_buffer object
      */
-    template <class T> void init_pb(Py_buffer *pb, int n, int d)
+    template <class T> void init_pb(Py_buffer *pb, int ndim, int *shape)
     {
       T dum=0;
       // Setting basic variable of the Py_buffer
@@ -44,18 +44,17 @@ namespace espressopp {
       pb->internal = NULL;
       pb->obj = NULL;
       pb->readonly = 1;
-      pb->ndim = 2;
+      pb->ndim = ndim;
       // The format is computed as a function of the template type T
       pb->format = (char*)malloc(2*sizeof(const char));
       strcpy(pb->format, get_format(dum));
       // Allocation and setting of the shape, stride and len
       pb->shape = (Py_ssize_t *)malloc(pb->ndim*sizeof(Py_ssize_t));
       pb->strides = NULL;
-      pb->shape[0] = n;
-      pb->shape[1] = d;
       pb->itemsize = sizeof(T);
       pb->len = pb->itemsize;
       for (int i=0; i<pb->ndim; i++) {
+	pb->shape[i] = shape[i];
 	pb->len *= pb->shape[i];
       }
       pb->buf = malloc(pb->len);
@@ -86,11 +85,15 @@ namespace espressopp {
 
     void PyStore::update() {
       System& system = getSystemRef();
+      int shape[2];
 
       int NLocal = system.storage->getNRealParticles();
 
-      if (store_position) init_pb<real>(&position, NLocal, 3);
-      if (store_id) init_pb<real>(&position, NLocal, 3);
+      shape[0] = NLocal;
+      shape[1] = 3;
+
+      if (store_position) init_pb<real>(&position, 2, shape);
+      if (store_id) init_pb<real>(&id, 1, shape);
 
       CellList realCells = system.storage->getRealCells();
 

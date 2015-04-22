@@ -30,7 +30,7 @@
 namespace espressopp {
   namespace analysis {
 
-    template <class T> void init_pb(Py_buffer *pb, int n, int d);
+    template <class T> void init_pb(Py_buffer *pb, int ndim, int *shape);
     void free_pb(Py_buffer *pb);
 
     /** Store particle data in Python buffers */
