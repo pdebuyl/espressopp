@@ -39,6 +39,7 @@ namespace espressopp {
       PyStore(shared_ptr<System> system);
       ~PyStore();
 
+      int get_NLocal() { return NLocal; }
       void set_store_position(bool _s) { store_position=_s; }
       bool get_store_position() { return store_position; }
       void set_store_id(bool _s) { store_id=_s; }
@@ -53,6 +54,7 @@ namespace espressopp {
     private:
       bool store_position, store_velocity, store_mass, store_id, store_force, store_species;
       bool cleared;
+      int NLocal;
       Py_buffer position;
       Py_buffer velocity;
       Py_buffer mass;

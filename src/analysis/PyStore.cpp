@@ -62,24 +62,36 @@ namespace espressopp {
 
     void free_pb(Py_buffer *pb) {
       free(pb->format);
+      pb->format = NULL;
       free(pb->shape);
+      pb->shape = NULL;
       free(pb->buf);
+      pb->buf = NULL;
+      pb->len = 0;
     }
 
     PyStore::PyStore(shared_ptr<System> system) : SystemAccess(system) {
       store_position = store_id = true;
       store_velocity = store_mass = store_force = store_species = false;
       cleared = true;
+      NLocal = -1;
+      position.len = 0;
+      velocity.len = 0;
+      mass.len = 0;
+      id.len = 0;
+      force.len = 0;
+      species.len = 0;
     }
 
     PyStore::~PyStore() {
-      if (!cleared) clear_buffers();
+      clear_buffers();
     }
 
     void PyStore::clear_buffers() {
       if (!cleared) {
 	if (store_position) free_pb(&position);
 	if (store_id) free_pb(&id);
+	cleared = true;
       }
     }
 
@@ -87,13 +99,16 @@ namespace espressopp {
       System& system = getSystemRef();
       int shape[2];
 
-      int NLocal = system.storage->getNRealParticles();
+      clear_buffers();
+
+      NLocal = system.storage->getNRealParticles();
 
       shape[0] = NLocal;
       shape[1] = 3;
 
       if (store_position) init_pb<real>(&position, 2, shape);
       if (store_id) init_pb<longint>(&id, 1, shape);
+      cleared = false;
 
       CellList realCells = system.storage->getRealCells();
 
@@ -111,11 +126,15 @@ namespace espressopp {
     }
 
     PyObject* PyStore::getPosition() {
-      return PyMemoryView_FromBuffer(&position);
+      if (store_position && position.len) return PyMemoryView_FromBuffer(&position);
+      Py_INCREF(Py_None);
+      return Py_None;
     }
 
     PyObject* PyStore::getId() {
-      return PyMemoryView_FromBuffer(&id);
+      if (store_id && id.len) return PyMemoryView_FromBuffer(&id);
+      Py_INCREF(Py_None);
+      return Py_None;
     }
 
     void PyStore::registerPython() {
@@ -127,6 +146,7 @@ namespace espressopp {
 	.def("clear_buffers", &PyStore::clear_buffers)
 	.def("getPosition", &PyStore::getPosition)
 	.def("getId", &PyStore::getId)
+        .add_property("NLocal", &PyStore::get_NLocal)
         .add_property("store_position", &PyStore::get_store_position, &PyStore::set_store_position)
         .add_property("store_id", &PyStore::get_store_id, &PyStore::set_store_id)
 
