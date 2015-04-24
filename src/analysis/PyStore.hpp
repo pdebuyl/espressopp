@@ -44,15 +44,21 @@ namespace espressopp {
       bool get_store_position() { return store_position; }
       void set_store_id(bool _s) { store_id=_s; }
       bool get_store_id() { return store_id; }
+      void set_store_species(bool _s) { store_species=_s; }
+      bool get_store_species() { return store_species; }
+      void set_store_state(bool _s) { store_state=_s; }
+      bool get_store_state() { return store_state; }
       void clear_buffers();
 
       void update();
       PyObject* getPosition();
       PyObject* getId();
+      PyObject* getSpecies();
+      PyObject* getState();
 
       static void registerPython();
     private:
-      bool store_position, store_velocity, store_mass, store_id, store_force, store_species;
+      bool store_position, store_velocity, store_mass, store_id, store_force, store_species, store_state;
       bool cleared;
       int NLocal;
       Py_buffer position;
@@ -61,6 +67,7 @@ namespace espressopp {
       Py_buffer id;
       Py_buffer force;
       Py_buffer species;
+      Py_buffer state;
     };
   }
 }

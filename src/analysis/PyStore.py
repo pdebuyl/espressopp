@@ -37,8 +37,14 @@ class PyStoreLocal(analysis_PyStore):
             id_ar = np.asarray(self.getId())
             self.file.create_dataset('id', (total_size,), dtype=int, chunks=(256,), fillvalue=-1)
             self.file['id'][idx_0:idx_1] = id_ar
-        self.file.create_dataset('species', (total_size,), dtype=int, chunks=(256,))
-        self.file['species'][idx_0:idx_1] = 1
+        if (self.store_species):
+            species = np.asarray(self.getSpecies())
+            self.file.create_dataset('species', (total_size,), dtype=int, chunks=(256,), fillvalue=-1)
+            self.file['species'][idx_0:idx_1] = species
+        if (self.store_state):
+            state = np.asarray(self.getState())
+            self.file.create_dataset('state', (total_size,), dtype=int, chunks=(256,), fillvalue=-1)
+            self.file['state'][idx_0:idx_1] = state
 
     def close_file(self):
         self.file.close()
@@ -48,6 +54,6 @@ if pmi.isController:
         __metaclass__ = pmi.Proxy
         pmiproxydefs = dict(
             cls =  'espressopp.analysis.PyStoreLocal',
-            pmicall = ['update', 'getPosition', 'getId', 'close_file', 'dump', 'clear_buffers'],
-            pmiproperty = ['store_position', 'store_id', 'store_species'],
+            pmicall = ['update', 'getPosition', 'getId', 'getSpecies', 'getState', 'close_file', 'dump', 'clear_buffers'],
+            pmiproperty = ['store_position', 'store_id', 'store_species', 'store_state'],
         )

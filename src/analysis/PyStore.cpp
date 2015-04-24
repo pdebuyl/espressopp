@@ -72,7 +72,7 @@ namespace espressopp {
 
     PyStore::PyStore(shared_ptr<System> system) : SystemAccess(system) {
       store_position = store_id = true;
-      store_velocity = store_mass = store_force = store_species = false;
+      store_velocity = store_mass = store_force = store_species = store_state = false;
       cleared = true;
       NLocal = -1;
       position.len = 0;
@@ -81,6 +81,7 @@ namespace espressopp {
       id.len = 0;
       force.len = 0;
       species.len = 0;
+      state.len = 0;
     }
 
     PyStore::~PyStore() {
@@ -91,6 +92,8 @@ namespace espressopp {
       if (!cleared) {
 	if (store_position) free_pb(&position);
 	if (store_id) free_pb(&id);
+	if (store_species) free_pb(&species);
+	if (store_state) free_pb(&state);
 	cleared = true;
       }
     }
@@ -108,6 +111,8 @@ namespace espressopp {
 
       if (store_position) init_pb<real>(&position, 2, shape);
       if (store_id) init_pb<longint>(&id, 1, shape);
+      if (store_species) init_pb<int>(&species, 1, shape);
+      if (store_state) init_pb<int>(&state, 1, shape);
       cleared = false;
 
       CellList realCells = system.storage->getRealCells();
@@ -121,6 +126,8 @@ namespace espressopp {
 	  ((real *) position.buf)[3*i+2] = tmpPos[2];
 	}
 	if (store_id) ((longint *) id.buf)[i] = cit->getId();
+	if (store_species) ((int *) species.buf)[i] = cit->getType();
+	if (store_state) ((int *) state.buf)[i] = cit->getState();
 	i++;
       }
     }
@@ -137,6 +144,18 @@ namespace espressopp {
       return Py_None;
     }
 
+    PyObject* PyStore::getSpecies() {
+      if (store_species && species.len) return PyMemoryView_FromBuffer(&species);
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+
+    PyObject* PyStore::getState() {
+      if (store_state && state.len) return PyMemoryView_FromBuffer(&state);
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+
     void PyStore::registerPython() {
       using namespace espressopp::python;
 
@@ -146,9 +165,13 @@ namespace espressopp {
 	.def("clear_buffers", &PyStore::clear_buffers)
 	.def("getPosition", &PyStore::getPosition)
 	.def("getId", &PyStore::getId)
+	.def("getSpecies", &PyStore::getSpecies)
+	.def("getState", &PyStore::getState)
         .add_property("NLocal", &PyStore::get_NLocal)
         .add_property("store_position", &PyStore::get_store_position, &PyStore::set_store_position)
         .add_property("store_id", &PyStore::get_store_id, &PyStore::set_store_id)
+        .add_property("store_species", &PyStore::get_store_species, &PyStore::set_store_species)
+        .add_property("store_state", &PyStore::get_store_state, &PyStore::set_store_state)
 
 	;
     }
