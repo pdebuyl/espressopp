@@ -24,13 +24,13 @@ class PyStoreLocal(analysis_PyStore):
         part = self.file.particles_group('all')
         self.box = part.box(dimension=3, boundary=['periodic', 'periodic', 'periodic'], time=True, edges=np.zeros(3, dtype=np.float64))
         if self.store_id:
-            self.id_e = part.trajectory('id', (256,), np.int, chunks=(1,256))
+            self.id_e = part.trajectory('id', (256,), np.int, chunks=(1,256), fillvalue=-1)
         if self.store_position:
             self.position = part.trajectory('position', (256,3), np.float64, chunks=(1,256, 3))
         if self.store_species:
-            self.species = part.trajectory('species', (256,), np.int, chunks=(1,256))
+            self.species = part.trajectory('species', (256,), np.int, chunks=(1,256), fillvalue=-1)
         if self.store_state:
-            self.state = part.trajectory('state', (256,), np.int, chunks=(1,256))
+            self.state = part.trajectory('state', (256,), np.int, chunks=(1,256), fillvalue=-1)
 
     def update(self):
         self.cxxclass.update(self)
