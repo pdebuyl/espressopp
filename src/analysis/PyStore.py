@@ -50,7 +50,6 @@ class PyStoreLocal(analysis_PyStore):
         NMaxLocal = np.array(0, 'i')
         MPI.COMM_WORLD.Allreduce(NLocal, NMaxLocal, op=MPI.MAX)
         cpu_size = ((NMaxLocal//256)+1)*256
-        print NLocal, NMaxLocal
         total_size = MPI.COMM_WORLD.size*cpu_size
         idx_0 = MPI.COMM_WORLD.rank*cpu_size
         idx_1 = idx_0+NLocal
